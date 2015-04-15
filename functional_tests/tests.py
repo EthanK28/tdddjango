@@ -19,8 +19,7 @@ class NewVisitorTest(LiveServerTestCase):
         table = self.browser.find_element_by_id('id_list_table')
         rows = self.browser.find_elements_by_tag_name('tr')
         self.assertIn(row_text, [row.text for row in rows])
-        for x in range(2):
-            print(rows[x].text)
+
 
 
     def test_can_start_a_list_and_retrieve_it_later(self):
@@ -38,37 +37,40 @@ class NewVisitorTest(LiveServerTestCase):
 
         inputbox.send_keys('Buy peacock feathers')
         inputbox.send_keys(Keys.ENTER)
+        edith_list_url = self.browser.current_url
+        self.assertRegex(edith_list_url, '/lists/.+')
+        self.check_for_row_in_list_table('1: Buy peacock feathers')
+
 
         inputbox = self.browser.find_element_by_id('id_new_item')
         inputbox.send_keys('Use peacock feathers to make a fly')
         inputbox.send_keys(Keys.ENTER)
 
-
-        self.check_for_row_in_list_table('1: Buy peacock feathers')
         self.check_for_row_in_list_table('2: Use peacock feathers to make a fly')
-        table = self.browser.find_element_by_id('id_list_table')
-        rows = table.find_elements_by_tag_name('tr')
-
-        # print(table)
-        # print ("rows: ", rows)
-        # rows2 = self.browser.find_elements_by_tag_name('tr')
 
 
-        # print ("rows2:", rows2[0].text)
-        #
-        # for row in rows:
-        #     print("텍스트:", row.text)
+        ## We use a new browser session to make sure that no information of Edith's
+        ## is coming through from cookies ets
+        self.browser.quit()
+        self.browser = webdriver.Firefox()
 
+        self.browser.get(self.live_server_url)
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Buy peacock feathers', page_text)
+        self.assertNotIn('make a fly', page_text)
 
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys('Buy milk')
+        inputbox.send_keys(Keys.ENTER)
 
+        francis_list_url = self.browser.current_url
+        self.assertRegex(francis_list_url, '/lists/.+')
+        self.assertNotEqual(francis_list_url, edith_list_url)
 
-        #self.assertIn('1: Buy peacock feathers', [row.text for row in rows2])
-        # self.assertTrue(
-        #     any(row.text=='1: Buy peacock feathers' for row in rows),
-        #     'New to-do item did not apear in table -- its text was:\n %s' % (
-        #         table.text,
-        #     )
-        # )
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Buy peacock feathers', page_text)
+        self.assertIn('Buy milk', page_text)
+
 
         self.fail('Finish the test!')
 
