@@ -72,7 +72,7 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertIn('Buy milk', page_text)
 
 
-        self.fail('Finish the test!')
+        #self.fail('Finish the test!')
 
 #
 # if __name__ == '__main__':
