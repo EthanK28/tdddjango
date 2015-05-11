@@ -4,12 +4,12 @@ from django.test import TestCase
 from django.http import HttpRequest
 from lists.views import home_page
 from lists.models import Item, List
+from django.utils.html import escape
 
 
 
 # Create your tests here.
 class NewItemTest(TestCase):
-
     def test_can_save_a_POST_requets_to_an_existing_list(self):
         other_list = List.objects.create()
         correct_list = List.objects.create()
@@ -31,12 +31,43 @@ class NewItemTest(TestCase):
             data={'item_text': 'A new item for an existing list'}
         )
 
-        self.assertRedirects(response, '/lists/%d/' %(correct_list.id, ))
+        self.assertRedirects(response, '/lists/%d/' % (correct_list.id, ))
+
+
+class NewListTest(TestCase):
+    def test_saving_a_POST_request(self):
+        self.client.post(
+            '/lists/new',
+            data={'item_text': 'A new list item'}
+        )
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertEqual(new_item.text, 'A new list item')
+
+
+    def test_redirects_after_POST(self):
+        response = self.client.post(
+            '/lists/new',
+            data={'item_text': 'A new list item'}
+        )
+        new_list = List.objects.first()
+        self.assertRedirects(response, '/lists/%d/' % (new_list.id,))
+
+    def test_validation_errors_are_sent_back_to_home_page_template(self):
+        response = self.client.post('/lists/new', data={'item_text': ''})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'home.html')
+        expected_error = escape("You can't have an empty list item")
+        # print(response.content.decode())
+        self.assertContains(response, expected_error)
+
+    def test_invalid_list_items_arent_saved(self):
+        self.client.post('/lists/new', data={'item_text': ''})
+        self.assertEqual(List.objects.count(), 0)
+        self.assertEqual(List.objects.count(), 0)
 
 
 class ListViewTest(TestCase):
-
-
     def test_displays_all_items(self):
         list_ = List.objects.create()
         Item.objects.create(text='itemey 1', list=list_)
@@ -89,7 +120,6 @@ class ListViewTest(TestCase):
 
 
 class HomePageTest(TestCase):
-
     def test_root_url_resolve_to_home_page_view(self):
         found = resolve('/')
         self.assertEqual(found.func, home_page)
