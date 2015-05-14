@@ -67,7 +67,7 @@ class ListViewTest(TestCase):
             data={'item_text': 'A new list item'}
         )
         new_list = List.objects.first()
-        print("response: ", response)
+        # print("response: ", response)
         self.assertRedirects(response, '/lists/%d/' % (new_list.id,))
 
 
