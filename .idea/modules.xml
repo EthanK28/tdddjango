@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/superlists.iml" filepath="$PROJECT_DIR$/.idea/superlists.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/tdddjango.iml" filepath="$PROJECT_DIR$/.idea/tdddjango.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/tdddjango.iml" filepath="$PROJECT_DIR$/.idea/tdddjango.iml" />
     </modules>
   </component>
 </project>
